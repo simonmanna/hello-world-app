@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  reactStrictMode: true,
+  experimental: {
+    serverActions: false, // Ensure it's disabled (only available in React 19)
+  },
   images: {
     domains: ["mlpgrevfohpiaepnnsch.supabase.co"], // Add your Supabase storage domain here
     remotePatterns: [
@@ -12,15 +16,6 @@ const nextConfig: NextConfig = {
       // Add more patterns if needed
     ],
   },
-  /* config options here */
 };
 
 export default nextConfig;
-// /** @type {import('next').NextConfig} */
-// const nextConfig = {
-//   images: {
-//     domains: ['mlpgrevfohpiaepnnsch.supabase.co'], // Add your Supabase storage domain here
-//   },
-// }
-
-// module.exports = nextConfig
