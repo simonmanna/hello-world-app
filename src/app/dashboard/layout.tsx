@@ -2,9 +2,9 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "@/app/providers/SessionProvider";
-import Sidebar from "@/components/dashboard/Sidebar";
-import Navbar from "@/components/dashboard/Navbar";
+import { useSession } from "../providers/SessionProvider";
+import Sidebar from "../components/dashboard/Sidebar";
+import Navbar from "../components/dashboard/Navbar";
 
 export default function DashboardLayout({
   children,

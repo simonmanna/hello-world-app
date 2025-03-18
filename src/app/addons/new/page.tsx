@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import AddonForm from "@/components/AddonForm";
+import AddonForm from "../../../components/AddonForm";
 import { Addon } from "@/types/addon";
 
 export default function NewAddon() {
