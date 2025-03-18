@@ -1,6 +1,6 @@
 // app/dashboard/layout.jsx
-import Sidebar from "@/components/dashboard/Sidebar";
-import Navbar from "@/components/dashboard/Navbar";
+import Sidebar from "../components/dashboard/Sidebar";
+import Navbar from "../components/dashboard/Navbar";
 
 export default function DashboardLayout({ children }) {
   return (
