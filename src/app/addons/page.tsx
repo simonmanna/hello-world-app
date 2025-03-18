@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Addon } from "@/types/addon";
+import { Addon } from "../../types/addon";
 
 export default function AddonsList() {
   const [addons, setAddons] = useState<Addon[]>([]);

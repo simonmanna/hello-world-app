@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import AddonForm from "../../../components/AddonForm";
-import { Addon } from "@/types/addon";
+import { Addon } from "../../../types/addon";
 
 export default function NewAddon() {
   const [error, setError] = useState<string | null>(null);

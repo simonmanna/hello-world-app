@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Addon } from "@/types/addon";
-import AddonForm from "@/components/AddonForm";
+import { Addon } from "../../../types/addon";
+import AddonForm from "../../../components/AddonForm";
 import Link from "next/link";
 import { use } from "react";
 

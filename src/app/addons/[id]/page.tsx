@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Addon } from "@/types/addon";
+import { Addon } from "../../../types/addon";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use } from "react";
