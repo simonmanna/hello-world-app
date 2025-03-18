@@ -1,8 +1,8 @@
 // app/menu-options/[id]/edit/page.tsx
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import MenuOptionForm from "@/components/MenuOptionForm";
-import { supabase, MenuOption } from "@/lib/supabaseClient";
+import MenuOptionForm from "../../../components/MenuOptionForm";
+import { supabase, MenuOption } from "../../../lib/supabaseClient";
 
 export const dynamic = "force-dynamic";
 

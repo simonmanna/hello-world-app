@@ -1,6 +1,6 @@
 // app/menu-options/page.tsx
-import { supabase, MenuOption } from "@/lib/supabaseClient";
-import MenuOptionList from "@/components/MenuOptionList";
+import { supabase, MenuOption } from "../../lib/supabaseClient";
+import MenuOptionList from "../components/MenuOptionList";
 
 export const dynamic = "force-dynamic";
 

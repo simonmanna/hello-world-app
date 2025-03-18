@@ -1,7 +1,7 @@
 // app/menu-options/[id]/page.tsx
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { supabase, MenuOption } from "@/lib/supabaseClient";
+import { supabase, MenuOption } from "../../lib/supabaseClient";
 
 export const dynamic = "force-dynamic";
 

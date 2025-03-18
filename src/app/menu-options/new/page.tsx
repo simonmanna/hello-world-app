@@ -1,6 +1,6 @@
 // app/menu-options/new/page.tsx
 import { Metadata } from "next";
-import MenuOptionForm from "@/components/MenuOptionForm";
+import MenuOptionForm from "../../components/MenuOptionForm";
 
 export const metadata: Metadata = {
   title: "Create New Menu Option",
