@@ -44,6 +44,8 @@ interface EditableItem {
   description: string | null;
   imageUrl: string | null;
   price?: number | null;
+  category_id?: number | null;
+  parent_id?: number | null;
   type: "category" | "menuItem";
 }
 
@@ -203,6 +205,9 @@ export default function CategoriesPage() {
       description: item.description,
       imageUrl: item.imageUrl,
       price: type === "menuItem" ? (item as MenuItem).price : undefined,
+      category_id:
+        type === "menuItem" ? (item as MenuItem).category_id : undefined,
+      parent_id: type === "category" ? (item as Category).parent_id : undefined,
       type: type,
     });
 
@@ -219,7 +224,16 @@ export default function CategoriesPage() {
   async function handleSaveEdit(editedItem: EditableItem) {
     setLoading(true);
 
-    const { id, name, description, imageUrl, price, type } = editedItem;
+    const {
+      id,
+      name,
+      description,
+      imageUrl,
+      price,
+      type,
+      category_id,
+      parent_id,
+    } = editedItem;
     const tableName = type === "category" ? "categories" : "menus";
 
     // Create update object based on item type
@@ -233,6 +247,12 @@ export default function CategoriesPage() {
     // Add price only for menu items
     if (type === "menuItem" && price !== undefined) {
       updateData.price = price;
+      updateData.category_id = category_id;
+    }
+
+    // Add parent_id for categories
+    if (type === "category" && parent_id !== undefined) {
+      updateData.parent_id = parent_id;
     }
 
     // Update the item in the database
@@ -245,35 +265,28 @@ export default function CategoriesPage() {
       console.error(`Error updating ${type}:`, error);
       alert(`Failed to update ${type}: ${error.message}`);
     } else {
-      // Refresh the data
-      // Refresh the data
+      // Handle successful update
       if (type === "category") {
+        // Complete refresh is needed as category hierarchy might have changed
         fetchCategories();
 
-        // Update the current category and path if necessary
+        // If category parent has changed, we need to return to a safe navigation point
         if (currentCategory && currentCategory.id === id) {
-          const updatedCategory = {
-            ...currentCategory,
-            name,
-            description,
-            imageUrl,
-          };
-          setCurrentCategory(updatedCategory);
-
-          // Update the category in the path
-          const newPath = [...categoryPath];
-          const categoryIndex = newPath.findIndex((cat) => cat.id === id);
-          if (categoryIndex !== -1) {
-            newPath[categoryIndex] = updatedCategory;
-            setCategoryPath(newPath);
-          }
+          // If we changed the currently selected category, go to the root level
+          setCurrentCategory(null);
+          setCategoryPath([]);
+          setMenuItems([]);
         }
       } else {
-        // For menu items, just update the local state
-        if (currentCategory) {
+        // For menu items, if category changed, refresh menu items
+        if (currentCategory && category_id !== currentCategory.id) {
+          // Remove the item from the current view if its category changed
+          setMenuItems(menuItems.filter((item) => item.id !== id));
+        } else {
+          // Just update the local state
           const updatedMenuItems = menuItems.map((item) =>
             item.id === id
-              ? { ...item, name, description, imageUrl, price }
+              ? { ...item, name, description, imageUrl, price, category_id }
               : item
           );
           setMenuItems(updatedMenuItems);
@@ -286,6 +299,7 @@ export default function CategoriesPage() {
               description,
               imageUrl,
               price,
+              category_id,
             });
           }
         }
@@ -297,7 +311,6 @@ export default function CategoriesPage() {
     setLoading(false);
   }
 
-  // Handle image upload
   // Handle image upload
   async function handleImageUpload(file: File): Promise<string | null> {
     try {

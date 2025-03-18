@@ -49,27 +49,7 @@ export default function Sidebar() {
       icon: <LayoutDashboard size={20} />,
     },
     {
-      label: "Orders",
-      href: "/orders",
-      icon: <ShoppingCart size={20} />,
-      subItems: [
-        { label: "All Orders", href: "/orders" },
-        { label: "Pending", href: "/orders/pending" },
-        { label: "Completed", href: "/orders/completed" },
-      ],
-    },
-    {
-      label: "Reports",
-      href: "/orders",
-      icon: <ShoppingCart size={20} />,
-      subItems: [
-        { label: "All Reports", href: "/reports/orders-report" },
-        { label: "Invoices", href: "/invoices/reports" },
-        { label: "Completed", href: "/orders/completed" },
-      ],
-    },
-    {
-      label: "Food Menu",
+      label: "Menu",
       href: "/categories",
       icon: <Utensils size={20} />,
       subItems: [
@@ -81,11 +61,37 @@ export default function Sidebar() {
         { label: "Options", href: "/menu-options" },
       ],
     },
+    {
+      label: "Orders",
+      href: "/all-orders",
+      icon: <ShoppingCart size={20} />,
+      subItems: [
+        { label: "All Orders", href: "/orders" },
+        { label: "Pending", href: "/orders-pending" },
+        { label: "Completed", href: "/orders-completed" },
+      ],
+    },
     // { label: "Menu", href: "/menu", icon: <ShoppingBag size={20} /> },
     { label: "Deliveries", href: "/deliveries", icon: <Truck size={20} /> },
     { label: "Invoices", href: "/invoices", icon: <Truck size={20} /> },
     { label: "Payments", href: "/payments", icon: <Truck size={20} /> },
     { label: "Rewards", href: "/rewards", icon: <Star size={20} /> },
+    {
+      label: "Feedbacks",
+      href: "/order-feedback",
+      icon: <MessageSquare size={20} />,
+    },
+    { label: "Drivers", href: "/drivers", icon: <UserCheck size={20} /> },
+    {
+      label: "Reports",
+      href: "/all-reports",
+      icon: <ShoppingCart size={20} />,
+      subItems: [
+        { label: "All Reports", href: "/reports/orders-report" },
+        { label: "Invoices", href: "/invoices/reports" },
+        { label: "Completed", href: "/orders/completed" },
+      ],
+    },
     {
       label: "Analytics",
       href: "/dashboard/analytics",
@@ -96,12 +102,6 @@ export default function Sidebar() {
         { label: "Performance", href: "/dashboard/analytics/performance" },
       ],
     },
-    {
-      label: "Feedbacks",
-      href: "/order-feedback",
-      icon: <MessageSquare size={20} />,
-    },
-    { label: "Drivers", href: "/drivers", icon: <UserCheck size={20} /> },
     { label: "Users", href: "/dashboard/users", icon: <Users size={20} /> },
     {
       label: "Settings",

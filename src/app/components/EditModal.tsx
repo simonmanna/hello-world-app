@@ -1,7 +1,17 @@
 // app/components/EditModal.tsx
-"use client";
+import React, { useState, useEffect } from "react";
+import { createClient } from "@supabase/supabase-js";
 
-import { useState, useRef } from "react";
+// Initialize Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+interface Category {
+  id: number;
+  name: string | null;
+  parent_id: number | null;
+}
 
 interface EditableItem {
   id: number;
@@ -9,6 +19,8 @@ interface EditableItem {
   description: string | null;
   imageUrl: string | null;
   price?: number | null;
+  category_id?: number | null;
+  parent_id?: number | null;
   type: "category" | "menuItem";
 }
 
@@ -27,180 +39,215 @@ export default function EditModal({
 }: EditModalProps) {
   const [name, setName] = useState(item.name || "");
   const [description, setDescription] = useState(item.description || "");
+  const [price, setPrice] = useState(item.price?.toString() || "");
   const [imageUrl, setImageUrl] = useState(item.imageUrl || "");
-  const [price, setPrice] = useState<string>(item.price?.toString() || "");
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadError, setUploadError] = useState("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [categoryId, setCategoryId] = useState<number | null>(
+    item.category_id || null
+  );
+  const [parentId, setParentId] = useState<number | null>(
+    item.parent_id || null
+  );
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const handleSave = () => {
-    onSave({
+  // Fetch all categories on component mount
+  useEffect(() => {
+    async function fetchCategories() {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("categories")
+        .select("id, name, parent_id")
+        .order("name");
+
+      if (error) {
+        console.error("Error fetching categories:", error);
+      } else if (data) {
+        setCategories(data);
+      }
+      setLoading(false);
+    }
+
+    fetchCategories();
+  }, []);
+
+  // Filter categories to prevent circular references
+  const availableCategories =
+    item.type === "category"
+      ? categories.filter((cat) => cat.id !== item.id)
+      : categories;
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setUploading(true);
+      const uploadedUrl = await onImageUpload(file);
+      if (uploadedUrl) {
+        setImageUrl(uploadedUrl);
+      }
+      setUploading(false);
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const editedItem: EditableItem = {
       ...item,
       name,
       description,
       imageUrl,
-      price: price ? parseFloat(price) : null,
-    });
-  };
+    };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsUploading(true);
-    setUploadError("");
-
-    try {
-      const url = await onImageUpload(file);
-      if (url) {
-        setImageUrl(url);
-      } else {
-        setUploadError("Failed to upload image. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      setUploadError("Error uploading image. Please try again.");
-    } finally {
-      setIsUploading(false);
+    if (item.type === "menuItem") {
+      editedItem.price = price ? parseFloat(price) : null;
+      editedItem.category_id = categoryId;
+    } else {
+      // For categories
+      editedItem.parent_id = parentId;
     }
-  };
 
-  const handleClickUpload = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Only allow numbers and decimal point
-    const value = e.target.value;
-    if (value === "" || /^\d+(\.\d{0,2})?$/.test(value)) {
-      setPrice(value);
-    }
+    onSave(editedItem);
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold">
-            Edit {item.type === "category" ? "Category" : "Menu Item"}
-          </h3>
-        </div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <h2 className="text-xl font-bold mb-4">
+          Edit {item.type === "category" ? "Category" : "Menu Item"}
+        </h2>
 
-        <div className="p-6">
-          {/* Name Input */}
+        <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-gray-700 text-sm font-bold mb-2">
               Name
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter name"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              required
             />
           </div>
 
-          {/* Description Input */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-gray-700 text-sm font-bold mb-2">
               Description
             </label>
             <textarea
-              value={description}
+              value={description || ""}
               onChange={(e) => setDescription(e.target.value)}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter description"
             />
           </div>
 
-          {/* Price Input (Only for menu items) */}
+          {/* For Menu Items: Category Selection */}
           {item.type === "menuItem" && (
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                Category
+              </label>
+              <select
+                value={categoryId || ""}
+                onChange={(e) =>
+                  setCategoryId(
+                    e.target.value ? parseInt(e.target.value) : null
+                  )
+                }
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              >
+                <option value="">Select Category</option>
+                {availableCategories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* For Categories: Parent Category Selection */}
+          {item.type === "category" && (
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                Parent Category
+              </label>
+              <select
+                value={parentId || ""}
+                onChange={(e) =>
+                  setParentId(e.target.value ? parseInt(e.target.value) : null)
+                }
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              >
+                <option value="">No Parent (Root Category)</option>
+                {availableCategories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Price field for menu items */}
+          {item.type === "menuItem" && (
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2">
                 Price (UGX)
               </label>
               <input
-                type="text"
+                type="number"
+                step="0.01"
                 value={price}
-                onChange={handlePriceChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter price"
+                onChange={(e) => setPrice(e.target.value)}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               />
             </div>
           )}
 
-          {/* Image Upload */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-gray-700 text-sm font-bold mb-2">
               Image
             </label>
-            <div className="flex items-start">
-              <div className="mr-4">
-                <div className="h-24 w-24 border rounded-md overflow-hidden bg-gray-100">
-                  {imageUrl ? (
-                    <img
-                      src={imageUrl}
-                      alt="Preview"
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="h-full w-full flex items-center justify-center text-gray-400">
-                      No image
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  accept="image/*"
-                  className="hidden"
+            {imageUrl && (
+              <div className="mb-2">
+                <img
+                  src={imageUrl}
+                  alt="Preview"
+                  className="h-32 w-auto object-cover rounded"
                 />
-                <button
-                  type="button"
-                  onClick={handleClickUpload}
-                  disabled={isUploading}
-                  className="px-3 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 mb-2"
-                >
-                  {isUploading ? "Uploading..." : "Upload New Image"}
-                </button>
-                {imageUrl && (
-                  <button
-                    type="button"
-                    onClick={() => setImageUrl("")}
-                    className="px-3 py-2 text-red-600 hover:text-red-800 block text-sm"
-                  >
-                    Remove Image
-                  </button>
-                )}
-                {uploadError && (
-                  <p className="text-red-500 text-sm mt-1">{uploadError}</p>
-                )}
               </div>
-            </div>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+            {uploading && (
+              <p className="mt-1 text-sm text-blue-600">Uploading...</p>
+            )}
           </div>
-        </div>
 
-        <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-          >
-            Save Changes
-          </button>
-        </div>
+          <div className="flex justify-end space-x-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={uploading}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-blue-300"
+            >
+              Save
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

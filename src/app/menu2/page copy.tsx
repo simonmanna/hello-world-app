@@ -5,6 +5,7 @@ import { useState, useEffect, useMemo } from "react";
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 // Initialize Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
@@ -122,15 +123,15 @@ export default function MenuList() {
 
   // Handle dummy action buttons
   const handleView = (id: number) => {
-    // alert(`View menu item with ID: ${id}`);
+    alert(`View menu item with ID: ${id}`);
     // In a real app, you would navigate to the detail page
-    router.push(`/admin/menu-item-addons/${id}`);
+    // router.push(`/menu/${id}`);
   };
 
   const handleEdit = (id: number) => {
-    // alert(`Edit menu item with ID: ${id}`);
+    alert(`Edit menu item with ID: ${id}`);
     // In a real app, you would navigate to the edit page
-    router.push(`/admin/menu-item-option-groups/${id}`);
+    // router.push(`/menu/edit/${id}`);
   };
 
   const handleDelete = (id: number) => {
@@ -252,6 +253,7 @@ export default function MenuList() {
                 >
                   ID <SortIndicator field="id" />
                 </th>
+                <th className="py-3 px-4 text-left">Image</th>
                 <th
                   className="py-3 px-4 text-left cursor-pointer hover:bg-gray-200"
                   onClick={() => handleSort("created_at")}
@@ -289,6 +291,37 @@ export default function MenuList() {
                     }`}
                   >
                     <td className="py-3 px-4 whitespace-nowrap">{item.id}</td>
+                    <td className="py-3 px-4">
+                      {item.imageUrl ? (
+                        <div className="h-10 w-10 relative rounded overflow-hidden">
+                          <img
+                            src={item.imageUrl}
+                            alt={item.name}
+                            className="h-full w-full object-cover"
+                            onError={(e) => {
+                              // Fallback to placeholder on error
+                              e.currentTarget.src = "/placeholder-food.png";
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div className="h-10 w-10 bg-gray-200 rounded flex items-center justify-center">
+                          <svg
+                            className="h-6 w-6 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                    </td>
                     <td className="py-3 px-4 whitespace-nowrap">
                       {formatDate(item.created_at)}
                     </td>
@@ -317,19 +350,19 @@ export default function MenuList() {
                           onClick={() => handleView(item.id)}
                           className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-xs transition"
                         >
-                          Addons
+                          View
                         </button>
                         <button
                           onClick={() => handleEdit(item.id)}
                           className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs transition"
                         >
-                          Choices
+                          Edit
                         </button>
                         <button
                           onClick={() => handleDelete(item.id)}
-                          className="bg-cyan-500 hover:bg-cyan-500 text-white px-2 py-1 rounded text-xs transition"
+                          className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs transition"
                         >
-                          View
+                          Delete
                         </button>
                       </div>
                     </td>
@@ -337,7 +370,7 @@ export default function MenuList() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="py-6 text-center text-gray-500">
+                  <td colSpan={7} className="py-6 text-center text-gray-500">
                     No menu items found matching your search.
                   </td>
                 </tr>

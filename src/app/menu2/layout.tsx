@@ -1,7 +1,6 @@
 // app/dashboard/layout.jsx
 import Sidebar from "@/components/dashboard/Sidebar";
 import Navbar from "@/components/dashboard/Navbar";
-import { Toaster } from "@/components/ui/toaster";
 
 export default function DashboardLayout({ children }) {
   return (

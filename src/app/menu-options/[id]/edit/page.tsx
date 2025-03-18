@@ -39,8 +39,21 @@ export default async function EditMenuOptionPage({
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-2xl font-bold mb-6">Edit Menu Option</h1>
-      <MenuOptionForm menuOption={menuOption as MenuOption} id={params.id} />
+      <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4">
+          <h1 className="text-2xl font-bold text-white">Edit Menu Option</h1>
+          <p className="text-blue-100 text-sm">
+            Customize your menu option details
+          </p>
+        </div>
+
+        <div className="p-6">
+          <MenuOptionForm
+            menuOption={menuOption as MenuOption}
+            id={params.id}
+          />
+        </div>
+      </div>
     </div>
   );
 }
